@@ -5,15 +5,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <title>Booking Calendar</title>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <link rel="stylesheet" href="{{ secure_asset('build/assets/app-T3Mp7Zfu.css') }}">
+    <script defer src="{{ secure_asset('build/assets/app-DspuE8pW.js') }}"></script>
     <style>
         #calendar {
             max-width: 1200px;
             margin: 40px auto;
         }
     </style>
+<link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js"
         data-client-key="{{ config('midtrans.client_key') }}"></script>
 </head>
@@ -109,7 +113,7 @@
             var calendarEl = document.getElementById('calendar');
             var calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
-                events: '{{ route('bookings.fetch') }}',
+                events: '{{ route('bookings.fetch', [], true) }}',
                 dateClick: function(info) {
                     // Isi tanggal yang dipilih ke dalam input
                     document.getElementById('date').value = info.dateStr;
@@ -164,7 +168,7 @@
             const formData = new FormData(document.getElementById('formStep'));
             closeModal();
 
-            fetch("{{ route('checkout') }}", {
+            fetch("{{ route('checkout', [], true) }}", {
                     method: 'POST',
                     body: formData,
                     headers: {

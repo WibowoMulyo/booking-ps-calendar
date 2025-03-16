@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  booking_app:
+    image: booking-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: booking_laravel_app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+    environment:
+      - DB_CONNECTION=mysql
+      - DB_HOST=booking_db
+      - DB_PORT=3306
+      - DB_DATABASE=booking_rental_ps
+      - DB_USERNAME=booking_user
+      - DB_PASSWORD=HvQ0gGsx4T0Zq4uH4JQ1
+    networks:
+      - booking_network
+
+  booking_webserver:
+    image: nginx:alpine
+    container_name: booking_laravel_webserver
+    restart: unless-stopped
+    ports:
+      - "8082:80"
+    volumes:
+      - .:/var/www/html
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - booking_network
+    depends_on:
+      - booking_app
+
+  booking_db:
+    image: mysql:latest
+    container_name: booking_laravel_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: booking_rental_ps
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_USER: booking_user
+      MYSQL_PASSWORD: HvQ0gGsx4T0Zq4uH4JQ1
+    volumes:
+      - booking_dbdata:/var/lib/mysql
+    networks:
+      - booking_network
+
+  booking_npm:
+    image: node:latest
+    container_name: booking_laravel_npm
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+    command: ["/bin/sh", "-c", "npm install && npm run build && npm run dev"]
+    networks:
+      - booking_network
+    depends_on:
+      - booking_app
+
+  booking_phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: booking_phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_ARBITRARY: 1
+      PMA_HOST: booking_db
+      MYSQL_ROOT_PASSWORD: rootpass
+    ports:
+      - "8081:80"
+    networks:
+      - booking_network
+    depends_on:
+      - booking_db
+
+volumes:
+  booking_dbdata:
+    driver: local
+
+networks:
+  booking_network:
+    driver: bridge
